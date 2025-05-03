@@ -10,26 +10,49 @@ export const getJudge0LanguageId = (language) => {
 }
 
 export const submitBatch = async (submissions)=>{
-    const {data} = await axios.post(`${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false`,{
-        submissions
-    })
+    // const {data} = await axios.post(`${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false`,{
+    //     submissions
+    // })
 
+    const options = {
+        method: 'POST',
+        url: 'https://judge0-ce.p.sulu.sh/submissions/batch',
+        headers:
+        {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer ${process.env.SULU_API_KEY}`
+        },
+        data: {
+            submissions
+        }
+    };
 
-    console.log("Submission Results: ", data)
-
-    return data // [{token} , {token} , {token}]
+    try {
+        const { data } = await axios.request(options);
+        return data;
+      } catch (error) {
+        console.error(error);
+      }
 }
 
 export const pollBatchResults = async (tokens)=>{
     while(true){
-        
-        const {data} = await axios.get(`${process.env.JUDGE0_API_URL}/submissions/batch`,{
-            params:{
-                tokens:tokens.join(","),
-                base64_encoded:false,
+        const options = {
+            method: 'GET',
+            url: `https://judge0-ce.p.sulu.sh/submissions/batch?tokens=${tokens.join(',')}`,
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${process.env.SULU_API_KEY}`
             }
-        })
-
+          };
+          console.log(options);
+          
+        
+        const {data} = await axios.request(options)
+    
+        console.log(data);
+        
         const results = data.submissions;
 
         const isAllDone = results.every(
@@ -40,3 +63,5 @@ export const pollBatchResults = async (tokens)=>{
         await sleep(1000)
     }
 }
+
+

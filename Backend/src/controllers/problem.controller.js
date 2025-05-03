@@ -24,6 +24,7 @@ export const createProblem = async (req,res) => {
                   .json({ error: `Language ${language} is not supported` });
               }
             
+            
               const submissions = testcases.map(({ input, output }) => ({
                 source_code: solutionCode,
                 language_id: languageId,
@@ -31,13 +32,17 @@ export const createProblem = async (req,res) => {
                 expected_output: output,
               }));
 
+            
+              
               const submissionResults = await submitBatch(submissions);
               const tokens = submissionResults.map((res) => res.token);
+              
+              
               const results = await pollBatchResults(tokens);
-
+              console.log("Nemo ",results);
               for (let i = 0; i < results.length; i++) {
                 const result = results[i];
-                console.log("Result-----", result);
+                // console.log("Result-----", result);
                 // console.log(
                 //   `Testcase ${i + 1} and Language ${language} ----- result ${JSON.stringify(result.status.description)}`
                 // );
@@ -70,7 +75,7 @@ export const createProblem = async (req,res) => {
               });
         }
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         return res.status(500).json({
         error: "Error While Creating Problem",
         });
@@ -181,7 +186,8 @@ export const updateProblemById = async (req,res) => {
                 }
                 }
 
-                const newProblem = await db.problem.create({
+                const newProblem = await db.problem.update({
+                where: {id},
                 data: {
                     title,
                     description,
