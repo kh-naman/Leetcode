@@ -1,6 +1,6 @@
 import { db } from "../libs/db.js";
 import {
-  getJudge0LanguageId,
+  getJudge0LanguageFromId,
   pollBatchResults,
   submitBatch,
 } from "../libs/judge0.lib.js";
@@ -17,7 +17,7 @@ export const createProblem = async (req,res) => {
 
     try {
         for (const [language,solutionCode] of Object.entries(referenceSolutions)) {
-            const languageId = getJudge0LanguageId(language)
+            const languageId = getJudge0LanguageFromId(language)
             if (!languageId) {
                 return res
                   .status(400)
@@ -155,7 +155,7 @@ export const updateProblemById = async (req,res) => {
         const {title,description,difficulty,tags,examples,constraints,testcases,codeSnippets,referenceSolutions} = req.body
 
         for (const [language,solutionCode] of Object.entries(referenceSolutions)) {
-            const languageId = getJudge0LanguageId(language)
+            const languageId = getJudge0LanguageFromId(language)
             if (!languageId) {
                 return res
                     .status(400)
@@ -217,6 +217,7 @@ export const updateProblemById = async (req,res) => {
     }
 };
 
+
 export const deleteProblem = async (req, res) => {
     const { id } = req.params;
   
@@ -242,5 +243,26 @@ export const deleteProblem = async (req, res) => {
   };
 
 export const getAllProblemSolvedByUser = async (req,res) => {
+    
+  try {
+    const solvedProblemsByThisUser = await db.problemSolved.findMany({
+      where: {
+        userId: req.user.id
+      },
+      include: {
+        problem: true
+      }
+    })
 
+    const problems = solvedProblemsByThisUser.map((entry) => entry.problem)
+    res.status(200).json({
+      success:true,
+      message:"Problems fetched successfully",
+      problems
+    })
+  } catch (error) {
+    console.error("Error fetching problems :" , error);
+    res.status(500).json({error:"Failed to fetch problems"})
+  }
+    
 }

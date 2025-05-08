@@ -1,13 +1,23 @@
 import axios from "axios"
 
-export const getJudge0LanguageId = (language) => {
+export const getLanguageName = (language) => {
     const languageMap = {
         "PYTHON":71,
         "JAVA":62,
         "JAVASCRIPT":63,
     }
-    return languageMap[language.toUpperCase()]
+    return languageMap[language.toUpperCase()] || "Unknown"
 }
+
+export const getJudge0LanguageFromId = (languageId) => {
+    const languageIdMap = {
+        63: "JAVASCRIPT",
+        62: "JAVA",
+        71: "PYTHON"
+    }
+    return languageIdMap[Number(languageId)]
+}
+
 
 export const submitBatch = async (submissions)=>{
     // const {data} = await axios.post(`${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false`,{
